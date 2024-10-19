@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rule Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        .card {
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        .card h2 {
+            color: #3498db;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            width: 100%;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            white-space: pre-wrap; /* Preserve formatting */
+        }
+    </style>
+</head>
+<body>
+    <h1>Rule Engine</h1>
+
+    <div class="container">
+        <div class="card">
+            <h2>Create Rule</h2>
+            <input type="text" id="create_rule_name" placeholder="Rule Name" />
+            <textarea id="create_rule_string" rows="4" placeholder="Rule String (e.g., age > 30 AND department = 'Sales')"></textarea>
+            <button onclick="createRule()">Create Rule</button>
+        </div>
+
+        <div class="card">
+            <h2>Combine Rules</h2>
+            <input type="text" id="combine_rule_names" placeholder="Rule Names (comma-separated)" />
+            <button onclick="combineRules()">Combine Rules</button>
+        </div>
+
+        <div class="card">
+            <h2>Evaluate Rule</h2>
+            <input type="text" id="evaluate_rule_name" placeholder="Rule Name" />
+            <textarea id="evaluate_data" rows="4" placeholder='Data (JSON format, e.g., {"age": 35, "department": "Sales"})'></textarea>
+            <button onclick="evaluateRule()">Evaluate Rule</button>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function createRule() {
+            const name = document.getElementById("create_rule_name").value;
+            const rule = document.getElementById("create_rule_string").value;
+
+            const response = await fetch('/create_rule', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, rule })
+            });
+            const result = await response.json();
+            document.getElementById("result").innerText = JSON.stringify(result, null, 2);
+        }
+
+        async function combineRules() {
+            const ruleNames = document.getElementById("combine_rule_names").value;
+
+            const response = await fetch('/combine_rules', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ rule_names: ruleNames.split(',').map(name => name.trim()) })
+            });
+            const result = await response.json();
+            document.getElementById("result").innerText = JSON.stringify(result, null, 2);
+        }
+
+        async function evaluateRule() {
+            const ruleName = document.getElementById("evaluate_rule_name").value;
+            const data = document.getElementById("evaluate_data").value;
+
+            const response = await fetch('/evaluate_rule', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ rule_name: ruleName, data: JSON.parse(data) })
+            });
+            const result = await response.json();
+            document.getElementById("result").innerText = JSON.stringify(result, null, 2);
+        }
+    </script>
+</body>
+</html>
